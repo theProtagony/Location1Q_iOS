@@ -177,7 +177,7 @@
 
 + (NSString*) siteUrl
 {
-    return @" http://test.1q.com/";
+    return @"http://test.1q.com/";
 
 }
 

@@ -9,6 +9,8 @@
 #import "LoginViewController.h"
 #import "PDKeychainBindings.h"
 #import "AFNetworking.h"
+#include "ListsViewController.h"
+
 
 @interface LoginViewController ()
 {
@@ -52,7 +54,7 @@
 - (void) loginClick:(id) info
 {
     // Receive auth token from API, store it.
-    NSString* apiString = @"http://test.1q.com/user/authenticate";
+    NSString* apiString = [NSString stringWithFormat:@"%@user/authenticate/", [ListsViewController siteUrl]];
     
     NSDictionary * userJSON = [[NSDictionary alloc] initWithObjectsAndKeys:
                                self.userName.text, @"username",
@@ -66,14 +68,39 @@
     [manager setRequestSerializer:[AFJSONRequestSerializer serializer]];
     [manager.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Accept"];
     [manager.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Content-type"];
-    [manager setResponseSerializer:[AFHTTPResponseSerializer serializer]];
+    [manager.requestSerializer setAuthorizationHeaderFieldWithUsername:self.userName.text password:self.userPass.text];
+//    [manager setResponseSerializer:[AFHTTPResponseSerializer serializer]];
     
     [manager POST:apiString parameters:userJSON success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"Returns: %@", responseObject);
         
+        if(responseObject != nil)
+        {
+            // Save the "_id" and "Auth-Token";
+            if([responseObject objectForKey:@"_id"])
+            {
+                [[PDKeychainBindings sharedKeychainBindings] setObject:[responseObject objectForKey:@"_id"] forKey:@"userId"];
+            }
+            
+            if([responseObject objectForKey:@"Auth-Token"])
+            {
+                [[PDKeychainBindings sharedKeychainBindings] setObject:[responseObject objectForKey:@"Auth-Token"] forKey:@"authToken"];
+                
+            }
+        }
+        
+        [self.navigationController popViewControllerAnimated:YES];
+        
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"Error: %@", error);
         
+
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Login Failed"
+                                                        message:@"Please check your username and password."
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+        [alert show];
     }];
 
 }
