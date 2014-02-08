@@ -1,15 +1,11 @@
 //
 //  LoginViewController.m
-//  TodoList
-//
-//  Created by Mitesh Shah on 12/4/13.
-//  Copyright (c) 2013 Partly Crazy. All rights reserved.
 //
 
 #import "LoginViewController.h"
 #import "PDKeychainBindings.h"
 #import "AFNetworking.h"
-#include "ListsViewController.h"
+#include "MainViewController.h"
 
 
 @interface LoginViewController ()
@@ -54,7 +50,7 @@
 - (void) loginClick:(id) info
 {
     // Receive auth token from API, store it.
-    NSString* apiString = [NSString stringWithFormat:@"%@user/authenticate/", [ListsViewController siteUrl]];
+    NSString* apiString = [NSString stringWithFormat:@"%@user/authenticate/", [MainViewController siteUrl]];
     
     NSDictionary * userJSON = [[NSDictionary alloc] initWithObjectsAndKeys:
                                self.userName.text, @"username",
@@ -66,10 +62,11 @@
     
     AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
     [manager setRequestSerializer:[AFJSONRequestSerializer serializer]];
+
     [manager.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Accept"];
     [manager.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Content-type"];
+    
     [manager.requestSerializer setAuthorizationHeaderFieldWithUsername:self.userName.text password:self.userPass.text];
-//    [manager setResponseSerializer:[AFHTTPResponseSerializer serializer]];
     
     [manager POST:apiString parameters:userJSON success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"Returns: %@", responseObject);
