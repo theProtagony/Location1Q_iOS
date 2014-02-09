@@ -84,10 +84,21 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6K5-7W-oaF">
-                                <rect key="frame" x="89" y="486" width="142" height="62"/>
+                                <rect key="frame" x="15" y="486" width="142" height="62"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="22"/>
+                                <size key="titleShadowOffset" width="0.0" height="2"/>
                                 <state key="normal" title="Ping Me" backgroundImage="Button_Up.png">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                </state>
+                                <state key="selected" backgroundImage="Button_Down.png"/>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bi6-F1-ENL">
+                                <rect key="frame" x="163" y="486" width="142" height="62"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="22"/>
+                                <size key="titleShadowOffset" width="0.0" height="2"/>
+                                <state key="normal" title="Track Me" backgroundImage="Button_Up.png">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                 </state>
                                 <state key="selected" backgroundImage="Button_Down.png"/>
@@ -106,14 +117,17 @@
                         <constraints>
                             <constraint firstItem="7hs-YT-zLN" firstAttribute="top" secondItem="hJL-L8-icg" secondAttribute="bottom" constant="38" id="3nK-7u-E1q"/>
                             <constraint firstItem="aqs-bM-co2" firstAttribute="top" secondItem="6K5-7W-oaF" secondAttribute="bottom" constant="20" id="QN0-Il-XF4"/>
-                            <constraint firstItem="7hs-YT-zLN" firstAttribute="centerX" secondItem="6K5-7W-oaF" secondAttribute="centerX" id="Vdq-Io-w2a"/>
-                            <constraint firstItem="6K5-7W-oaF" firstAttribute="centerX" secondItem="LBA-mH-A9b" secondAttribute="centerX" id="Zg6-E2-Xub"/>
+                            <constraint firstItem="bi6-F1-ENL" firstAttribute="leading" secondItem="6K5-7W-oaF" secondAttribute="trailing" constant="6" id="Tz0-Tz-x88"/>
+                            <constraint firstItem="7hs-YT-zLN" firstAttribute="centerX" secondItem="6K5-7W-oaF" secondAttribute="centerX" constant="74" id="Vdq-Io-w2a"/>
+                            <constraint firstItem="6K5-7W-oaF" firstAttribute="centerX" secondItem="LBA-mH-A9b" secondAttribute="centerX" constant="-74" id="Zg6-E2-Xub"/>
                             <constraint firstItem="7hs-YT-zLN" firstAttribute="leading" secondItem="LBA-mH-A9b" secondAttribute="leading" constant="20" symbolic="YES" id="gTP-eA-7ga"/>
+                            <constraint firstItem="aqs-bM-co2" firstAttribute="top" secondItem="bi6-F1-ENL" secondAttribute="bottom" constant="20" id="oDH-za-3vk"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Location 1Q" id="Ahq-3k-PPV"/>
                     <connections>
                         <outlet property="btnPing" destination="6K5-7W-oaF" id="VEv-27-NbI"/>
+                        <outlet property="btnTrack" destination="bi6-F1-ENL" id="HMm-Ja-L0G"/>
                         <outlet property="txtLocation" destination="7hs-YT-zLN" id="3hh-hv-Fka"/>
                         <segue destination="DZk-mc-PgR" kind="push" identifier="LoginSegue" id="xa1-Bw-aNl"/>
                     </connections>

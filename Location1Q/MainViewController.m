@@ -13,25 +13,18 @@
 @implementation MainViewController
 {
     
-    NSMutableArray * jsonArray;
-
+    NSString * storedUserId;        // User ID for the API (store / retrieve from keychain)
+    NSString * storedAuthToken;     // Authentication Token for the API (store / retrieve from keychain)
     
-    NSString * storedUserId;
-    NSString * storedAuthToken;
+    UIActivityIndicatorView * busyIndicator;    // For longer operations, displays the spinner.
     
-    UIActivityIndicatorView * busyIndicator;
+    CLLocationManager * locationManager;    // Works with the Location Framework to get the Longitude / Latitude.
     
-    CLLocationManager * locationManager;
+    BOOL isTracking;        // One time or continuous?
+    int  sendCount;         // How many sent to API during this tracking session..
 }
 
-
-- (void)awakeFromNib
-{
-    
-    [super awakeFromNib];
-    
-}
-
+// Utility function for testing. Removes stored data in keychain.
 - (void) clearCredentials
 {
     [[PDKeychainBindings sharedKeychainBindings] removeObjectForKey:@"userId"];
@@ -41,19 +34,23 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
 
-    
+    // If user credentials are not present, navigate to the login screen.
     if(![self verifyCredentials])
     {
         [self performSegueWithIdentifier:@"LoginSegue" sender:self];
     }
 
+    // Setup the ping button to perform a one time location hit.
     if(self.btnPing)
     {
         [self.btnPing addTarget:self action:@selector(pingMe) forControlEvents:UIControlEventTouchUpInside];
     }
     
+    if(self.btnTrack)
+    {
+        [self.btnTrack addTarget:self action:@selector(toggleTracking) forControlEvents:UIControlEventTouchUpInside];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -62,6 +59,7 @@
     // Dispose of any resources that can be recreated.
 }
 
+// Retrieves the stored user authentication from keychain and returns boolean to indicate if they exist.
 - (BOOL) verifyCredentials
 {
     storedUserId = [[PDKeychainBindings sharedKeychainBindings] objectForKey:@"userId"];
@@ -73,6 +71,7 @@
     return NO;
 }
 
+// Initiates a one time hit.
 - (void) pingMe
 {
     NSLog(@"Ping Me!");
@@ -85,18 +84,72 @@
         [self.view addSubview:busyIndicator];
     }
     
-    [self.btnPing setEnabled:NO];
+    [self disableButtons];
     [busyIndicator startAnimating];
     [self startStandardUpdates];
     
 }
 
+- (void) disableButtons
+{
+    if(self.btnPing)
+    {
+        [self.btnPing setEnabled:NO];
+    }
+    if (self.btnTrack)
+    {
+        [self.btnTrack setEnabled:NO];
+    }
+}
+
+- (void) enableButtons
+{
+    if(self.btnPing)
+    {
+        [self.btnPing setEnabled:YES];
+    }
+    if (self.btnTrack)
+    {
+        [self.btnTrack setEnabled:YES];
+    }
+}
+
+- (void) toggleTracking
+{
+
+    if(isTracking)
+    {
+        [locationManager stopUpdatingLocation];
+        [self.btnTrack setTitle:@"Track Me" forState:UIControlStateNormal];
+        NSLog(@"Tracking Off.");
+    }
+    else
+    {
+        // Choose between high battery impact + high accuracy,
+        // Or low battery impact + low accuracy.
+//        [self startStandardUpdates];
+        [self startSignificantChangeUpdates];
+        isTracking = YES;
+        sendCount = 0;
+        [self.btnTrack setTitle:@"Stop" forState:UIControlStateNormal];
+        NSLog(@"Tracking On.");
+    }
+
+}
+
+// At the end of a one time hit.
 - (void) pingCompleted
 {
+    NSLog(@"Ping Completed.");
+    
+    // Stop receiving updates.
+    [locationManager stopUpdatingLocation];
+
+    
     if(busyIndicator)
     {
         [busyIndicator stopAnimating];
-        [self.btnPing setEnabled:YES];
+        [self enableButtons];
     }
 }
 
@@ -112,10 +165,25 @@
         locationManager.desiredAccuracy = kCLLocationAccuracyBest;
     
         // Set a movement threshold for new events.
+        // Disable this when debugging location updates.
         locationManager.distanceFilter = 500; // meters
     
     }
+    // Start receiving updates.
     [locationManager startUpdatingLocation];
+}
+
+- (void)startSignificantChangeUpdates
+{
+    // Create the location manager if this object does not
+    // already have one.
+    if (nil == locationManager)
+    {
+        locationManager = [[CLLocationManager alloc] init];
+        locationManager.delegate = self;
+    }
+    // Start receiving updates (low battery use).
+    [locationManager startMonitoringSignificantLocationChanges];
 }
 
 // Delegate method from the CLLocationManagerDelegate protocol.
@@ -123,18 +191,22 @@
      didUpdateLocations:(NSArray *)locations
 {
 
+    NSLog(@"Location Manager : didUpdateLocations");
+    
     // Take the last location.
     CLLocation* location = [locations lastObject];
     
     NSDate* eventDate = location.timestamp;
     NSTimeInterval howRecent = [eventDate timeIntervalSinceNow];
     
-    if (abs(howRecent) < 15.0)
+    if (!isTracking || sendCount == 0 || abs(howRecent) < 15.0)
     {
+        sendCount++;
+
         // If the event is recent, do something with it.
-        NSLog(@"latitude %+.6f, longitude %+.6f\n",
+        NSLog(@"latitude %+.6f, longitude %+.6f; count: %d\n",
               location.coordinate.latitude,
-              location.coordinate.longitude);
+              location.coordinate.longitude, sendCount);
         
         // Display in text.
         if(self.txtLocation)
@@ -145,13 +217,19 @@
         // Send this location to the API.
         [self sendLocationToApi:location.coordinate];
         
+        
     }
     
-    [locationManager stopUpdatingLocation];
-    [self pingCompleted];
+    // Stop now if this is a ping.
+    if(!isTracking)
+    {
+        [locationManager stopUpdatingLocation];
+        [self pingCompleted];
+    }
     
 }
 
+// Sends a 2D location coordinate to the 1Q API.
 - (void) sendLocationToApi:(CLLocationCoordinate2D) location
 {
     // Receive auth token from API, store it.
@@ -175,23 +253,30 @@
     [manager setResponseSerializer:[AFHTTPResponseSerializer serializer]];
     
     [manager POST:apiString parameters:locationJSON success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        NSLog(@"Returns: %@", responseObject);
+//        NSLog(@"Returns: %@", responseObject);
         
-        [self.btnPing setTitle:@"Success" forState:UIControlStateNormal];
-
+        if(!isTracking)
+        {
+            [self.btnPing setTitle:@"Success" forState:UIControlStateNormal];
+        }
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"Error: %@", error);
 
-        [self.btnPing setTitle:@"Try Again" forState:UIControlStateNormal];
+        if(!isTracking)
+        {
+            [self.btnPing setTitle:@"Try Again" forState:UIControlStateNormal];
+        }
         
     }];
 
 }
 
+// Location manager failed to retrieve the location.
 - (void) locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
 {
     NSLog(@"Location Update failed!");
+    
     [self pingCompleted];
     [self.btnPing setTitle:@"Try Again" forState:UIControlStateNormal];
 }

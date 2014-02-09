@@ -4,6 +4,7 @@
 
 #import <UIKit/UIKit.h>
 
+// Simplifies the login process.
 @interface LoginViewController : UIViewController
 
 @property IBOutlet UITextField * userName;
