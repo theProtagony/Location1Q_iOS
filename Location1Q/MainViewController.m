@@ -135,9 +135,16 @@
         NSLog(@"latitude %+.6f, longitude %+.6f\n",
               location.coordinate.latitude,
               location.coordinate.longitude);
+        
+        // Display in text.
+        if(self.txtLocation)
+        {
+            self.txtLocation.text = [NSString stringWithFormat:@"Lat: %+.4f, Long: %+.4f", location.coordinate.latitude, location.coordinate.longitude];
+        }
+        
+        // Send this location to the API.
         [self sendLocationToApi:location.coordinate];
         
-        // Send to API.
     }
     
     [locationManager stopUpdatingLocation];
@@ -161,6 +168,8 @@
     
     [manager.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Accept"];
     [manager.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Content-type"];
+    
+    // API Authentication token.
     [manager.requestSerializer setValue:storedAuthToken forHTTPHeaderField:@"Auth-Token"];
     
     [manager setResponseSerializer:[AFHTTPResponseSerializer serializer]];

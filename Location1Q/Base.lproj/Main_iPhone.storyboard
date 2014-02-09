@@ -92,16 +92,29 @@
                                 </state>
                                 <state key="selected" backgroundImage="Button_Down.png"/>
                             </button>
+                            <textField opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Your Location" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="7hs-YT-zLN">
+                                <rect key="frame" x="20" y="102" width="280" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="jkk-BN-jDx"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
                         </subviews>
                         <color key="backgroundColor" red="0.88235300779342651" green="0.93333339691162109" blue="0.96862751245498657" alpha="1" colorSpace="deviceRGB"/>
                         <constraints>
+                            <constraint firstItem="7hs-YT-zLN" firstAttribute="top" secondItem="hJL-L8-icg" secondAttribute="bottom" constant="38" id="3nK-7u-E1q"/>
                             <constraint firstItem="aqs-bM-co2" firstAttribute="top" secondItem="6K5-7W-oaF" secondAttribute="bottom" constant="20" id="QN0-Il-XF4"/>
+                            <constraint firstItem="7hs-YT-zLN" firstAttribute="centerX" secondItem="6K5-7W-oaF" secondAttribute="centerX" id="Vdq-Io-w2a"/>
                             <constraint firstItem="6K5-7W-oaF" firstAttribute="centerX" secondItem="LBA-mH-A9b" secondAttribute="centerX" id="Zg6-E2-Xub"/>
+                            <constraint firstItem="7hs-YT-zLN" firstAttribute="leading" secondItem="LBA-mH-A9b" secondAttribute="leading" constant="20" symbolic="YES" id="gTP-eA-7ga"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Location 1Q" id="Ahq-3k-PPV"/>
                     <connections>
                         <outlet property="btnPing" destination="6K5-7W-oaF" id="VEv-27-NbI"/>
+                        <outlet property="txtLocation" destination="7hs-YT-zLN" id="3hh-hv-Fka"/>
                         <segue destination="DZk-mc-PgR" kind="push" identifier="LoginSegue" id="xa1-Bw-aNl"/>
                     </connections>
                 </viewController>

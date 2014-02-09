@@ -8,6 +8,7 @@
 @interface MainViewController : UIViewController<CLLocationManagerDelegate>
 
 @property IBOutlet UIButton* btnPing;
+@property IBOutlet UITextField* txtLocation;
 
 + (NSString*) siteUrl;
 
