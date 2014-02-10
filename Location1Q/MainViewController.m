@@ -22,6 +22,8 @@
     
     BOOL isTracking;        // One time or continuous?
     int  sendCount;         // How many sent to API during this tracking session..
+    
+    BOOL standardMethod;
 }
 
 // Utility function for testing. Removes stored data in keychain.
@@ -120,7 +122,10 @@
     if(isTracking)
     {
         [locationManager stopUpdatingLocation];
+        [locationManager stopMonitoringSignificantLocationChanges];
+        
         [self.btnTrack setTitle:@"Track Me" forState:UIControlStateNormal];
+        
         NSLog(@"Tracking Off.");
     }
     else
@@ -184,6 +189,7 @@
     }
     // Start receiving updates (low battery use).
     [locationManager startMonitoringSignificantLocationChanges];
+    standardMethod = NO;
 }
 
 // Delegate method from the CLLocationManagerDelegate protocol.
@@ -224,6 +230,7 @@
     if(!isTracking)
     {
         [locationManager stopUpdatingLocation];
+        [locationManager stopMonitoringSignificantLocationChanges];
         [self pingCompleted];
     }
     
